@@ -3,6 +3,7 @@ package esa
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -348,6 +349,7 @@ func TestCheckResponse_noBody(t *testing.T) {
 
 	want := &ErrorResponse{
 		Response: res,
+		err:      errors.New("Not JSON"),
 	}
 	if !reflect.DeepEqual(err, want) {
 		t.Errorf("Error = %#v, want %#v", err, want)

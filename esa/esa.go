@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -283,6 +284,7 @@ type ErrorResponse struct {
 	Response *http.Response // HTTP response that caused this error
 	Message  string         `json:"message"` // error message
 	ErrorStr string         `json:"error"`   // more detail about an error
+	err      error          // CheckResponse error
 }
 
 func (r *ErrorResponse) Error() string {
@@ -319,7 +321,9 @@ func CheckResponse(r *http.Response) error {
 	data, err := ioutil.ReadAll(r.Body)
 	if err == nil && data != nil {
 		err = json.Unmarshal(data, errorResponse)
-		return err
+		if err != nil {
+			errorResponse.err = errors.New("Not JSON")
+		}
 	}
 	switch r.StatusCode {
 	case http.StatusTooManyRequests:
