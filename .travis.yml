@@ -1,0 +1,19 @@
+---
+sudo: false
+language: go
+go:
+  - 1.9.x
+  - 1.8.x
+  - 1.7.x
+  - master
+matrix:
+  allow_failures:
+    - go: master
+  fast_finish: true
+before_install:
+  - go get github.com/golang/dep/cmd/dep
+  - go get github.com/mattn/goveralls
+install:
+  - $GOPATH/bin/dep ensure -vendor-only -v
+script:
+  - $GOPATH/bin/goveralls -race -service=travis-ci
