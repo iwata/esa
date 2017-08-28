@@ -15,10 +15,6 @@ import (
 	"time"
 )
 
-const (
-	token = "b81f8961eb0a8c53faf69faf71b7d62dab9e581f7d2f5344f7f0d686e9e711f8"
-)
-
 var (
 	// mux is the HTTP request multiplexer used with the test server.
 	mux *http.ServeMux
@@ -48,25 +44,6 @@ func setup() {
 func teardown() {
 	server.Close()
 }
-
-//func TestExec(t *testing.T) {
-//ctx := context.Background()
-//ts := oauth2.StaticTokenSource(
-//&oauth2.Token{AccessToken: token},
-//)
-//tc := oauth2.NewClient(ctx, ts)
-//c := NewClient(tc)
-//req, err := c.NewRequest("GET", "/teams", nil)
-//if err != nil {
-//t.Error(err)
-//}
-//v := new(bytes.Buffer)
-//_, err = c.Do(ctx, req, v)
-//if err != nil {
-//t.Error(err)
-//}
-//t.Errorf("%s", v)
-//}
 
 func testURLParseError(t *testing.T, err error) {
 	if err == nil {

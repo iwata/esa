@@ -304,7 +304,7 @@ type RateLimitError struct {
 func (r *RateLimitError) Error() string {
 	return fmt.Sprintf("%v %v: %d %v %v",
 		r.Response.Request.Method, sanitizeURL(r.Response.Request.URL),
-		r.Response.StatusCode, r.Message, r.Rate.Reset.Time.Sub(time.Now()))
+		r.Response.StatusCode, r.Message, time.Until(r.Rate.Reset.Time))
 }
 
 // CheckResponse checks the API response for errors, and returns them if
