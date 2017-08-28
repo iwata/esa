@@ -30,8 +30,6 @@ const (
 
 // A Client manages communication with the esa API v1.
 type Client struct {
-	clientMu sync.Mutex // clientMu protects the client during calls that modify the CheckRedirect func.
-
 	client  *http.Client
 	BaseURL *url.URL
 
@@ -40,6 +38,8 @@ type Client struct {
 
 	common service // Reuse a single struct instead of allocating one for each service on the heap.
 	// Services used for talking to different parts of the esa API.
+
+	Teams *TeamsService
 
 	err error
 }
@@ -120,6 +120,8 @@ func NewClient(httpClient *http.Client) *Client {
 	}
 	baseURL, err := url.Parse(baseURL)
 	c := &Client{client: httpClient, BaseURL: baseURL, err: err}
+	c.common.client = c
+	c.Teams = (*TeamsService)(&c.common)
 	return c
 }
 
@@ -304,7 +306,7 @@ type RateLimitError struct {
 func (r *RateLimitError) Error() string {
 	return fmt.Sprintf("%v %v: %d %v %v",
 		r.Response.Request.Method, sanitizeURL(r.Response.Request.URL),
-		r.Response.StatusCode, r.Message, time.Until(r.Rate.Reset.Time))
+		r.Response.StatusCode, r.Message, r.Rate.Reset.Time.Sub(time.Now()))
 }
 
 // CheckResponse checks the API response for errors, and returns them if
