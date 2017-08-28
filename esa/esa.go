@@ -39,6 +39,8 @@ type Client struct {
 
 	common service // Reuse a single struct instead of allocating one for each service on the heap.
 	// Services used for talking to different parts of the esa API.
+
+	err error
 }
 
 // Response is a esa API response. This wraps the standard http.Response.
@@ -57,15 +59,28 @@ func newResponse(r *http.Response) *Response {
 
 // parseRate parses the rate related headers.
 func parseRate(r *http.Response) Rate {
-	var rate Rate
+	var (
+		rate Rate
+		err  error
+	)
+
 	if limit := r.Header.Get(headerRateLimit); limit != "" {
-		rate.Limit, _ = strconv.Atoi(limit)
+		rate.Limit, err = strconv.Atoi(limit)
+		if err != nil {
+			rate.err = err
+		}
 	}
 	if remaining := r.Header.Get(headerRateRemaining); remaining != "" {
-		rate.Remaining, _ = strconv.Atoi(remaining)
+		rate.Remaining, err = strconv.Atoi(remaining)
+		if err != nil {
+			rate.err = err
+		}
 	}
 	if reset := r.Header.Get(headerRateReset); reset != "" {
-		if v, _ := strconv.ParseInt(reset, 10, 64); v != 0 {
+		v, e := strconv.ParseInt(reset, 10, 64)
+		if e != nil {
+			rate.err = e
+		} else if v != 0 {
 			rate.Reset = Timestamp{time.Unix(v, 0)}
 		}
 	}
@@ -82,6 +97,8 @@ type Rate struct {
 
 	// The time at which the current rate limit will reset.
 	Reset Timestamp `json:"reset"`
+
+	err error
 }
 
 func (r Rate) String() string {
@@ -100,8 +117,8 @@ func NewClient(httpClient *http.Client) *Client {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
 	}
-	baseURL, _ := url.Parse(baseURL)
-	c := &Client{client: httpClient, BaseURL: baseURL}
+	baseURL, err := url.Parse(baseURL)
+	c := &Client{client: httpClient, BaseURL: baseURL, err: err}
 	return c
 }
 
@@ -185,8 +202,12 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}) (*Res
 
 	defer func() {
 		// Drain up to 512 bytes and close the body to let the Transport reuse the connection
-		io.CopyN(ioutil.Discard, resp.Body, 512)
-		resp.Body.Close()
+		if _, err = io.CopyN(ioutil.Discard, resp.Body, 512); err != nil {
+			c.err = err
+		}
+		if err = resp.Body.Close(); err != nil {
+			c.err = err
+		}
 	}()
 
 	response := newResponse(resp)
@@ -204,7 +225,7 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}) (*Res
 
 	if v != nil {
 		if w, ok := v.(io.Writer); ok {
-			io.Copy(w, resp.Body)
+			_, err = io.Copy(w, resp.Body)
 		} else {
 			err = json.NewDecoder(resp.Body).Decode(v)
 			if err == io.EOF {
@@ -297,7 +318,8 @@ func CheckResponse(r *http.Response) error {
 	errorResponse := &ErrorResponse{Response: r}
 	data, err := ioutil.ReadAll(r.Body)
 	if err == nil && data != nil {
-		json.Unmarshal(data, errorResponse)
+		err = json.Unmarshal(data, errorResponse)
+		return err
 	}
 	switch r.StatusCode {
 	case http.StatusTooManyRequests:
