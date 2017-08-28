@@ -10,10 +10,24 @@ matrix:
   allow_failures:
     - go: master
   fast_finish: true
+env:
+  global:
+    - REVIEWDOG_VERSION=0.9.8
 before_install:
   - go get github.com/golang/dep/cmd/dep
   - go get github.com/mattn/goveralls
+  - go get github.com/golang/lint/golint
+  - go get github.com/kisielk/errcheck
+  - go get honnef.co/go/tools/cmd/unused
+  - go get honnef.co/go/tools/cmd/gosimple
+  - go get honnef.co/go/tools/cmd/staticcheck
+  - mkdir -p $HOME/bin/ && export PATH="$HOME/bin:$GOPATH/bin:$PATH"
 install:
-  - $GOPATH/bin/dep ensure -vendor-only -v
+  - |
+    curl -fSL https://github.com/haya14busa/reviewdog/releases/download/$REVIEWDOG_VERSION/reviewdog_linux_amd64 \
+      -o ~/bin/reviewdog && \
+      chmod +x ~/bin/reviewdog
+  - dep ensure -vendor-only -v
 script:
-  - $GOPATH/bin/goveralls -race -service=travis-ci
+  - goveralls -race -service=travis-ci
+  - reviewdog -ci=travis -conf=./reviewdog.yml
