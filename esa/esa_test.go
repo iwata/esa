@@ -141,7 +141,7 @@ func TestDo(t *testing.T) {
 		A string
 	}
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/v1/", func(w http.ResponseWriter, r *http.Request) {
 		if m := "GET"; m != r.Method {
 			t.Errorf("Request method = %v, want %v", r.Method, m)
 		}
@@ -162,7 +162,7 @@ func TestDo_httpError(t *testing.T) {
 	setup()
 	defer teardown()
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/v1/", func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad Request", 400)
 	})
 
@@ -178,8 +178,8 @@ func TestDo_redirectLoop(t *testing.T) {
 	setup()
 	defer teardown()
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/", http.StatusFound)
+	mux.HandleFunc("/v1/", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/v1/", http.StatusFound)
 	})
 
 	req, _ := client.NewRequest("GET", "/", nil)
@@ -198,7 +198,7 @@ func TestDo_rateLimit_errorResponse(t *testing.T) {
 	setup()
 	defer teardown()
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/v1/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set(headerRateLimit, "60")
 		w.Header().Set(headerRateRemaining, "59")
 		w.Header().Set(headerRateReset, "1372700873")
@@ -230,7 +230,7 @@ func TestDo_rateLimit_rateLimitError(t *testing.T) {
 	setup()
 	defer teardown()
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/v1/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set(headerRateLimit, "60")
 		w.Header().Set(headerRateRemaining, "0")
 		w.Header().Set(headerRateReset, "1372700873")
@@ -264,11 +264,65 @@ func TestDo_rateLimit_rateLimitError(t *testing.T) {
 	}
 }
 
+// Ensure a network call is not made when it's known that API rate limit is still exceeded.
+func TestDo_rateLimit_noNetworkCall(t *testing.T) {
+	setup()
+	defer teardown()
+
+	reset := time.Now().UTC().Add(time.Minute).Round(time.Second) // Rate reset is a minute from now, with 1 second precision.
+
+	mux.HandleFunc("/v1/first", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set(headerRateLimit, "60")
+		w.Header().Set(headerRateRemaining, "0")
+		w.Header().Set(headerRateReset, fmt.Sprint(reset.Unix()))
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusTooManyRequests)
+		fmt.Fprintln(w, `{
+   "message": "API rate limit exceeded for xxx.xxx.xxx.xxx.",
+   "error": "Too Many Requests"
+}`)
+	})
+
+	madeNetworkCall := false
+	mux.HandleFunc("/v1/second", func(w http.ResponseWriter, r *http.Request) {
+		madeNetworkCall = true
+	})
+
+	// First request is made, and it makes the client aware of rate reset time being in the future.
+	req, _ := client.NewRequest("GET", "/first", nil)
+	client.Do(context.Background(), req, nil)
+
+	// Second request should not cause a network call to be made, since client can predict a rate limit error.
+	req, _ = client.NewRequest("GET", "/second", nil)
+	_, err := client.Do(context.Background(), req, nil)
+
+	if madeNetworkCall {
+		t.Fatal("Network call was made, even though rate limit is known to still be exceeded.")
+	}
+
+	if err == nil {
+		t.Error("Expected error to be returned.")
+	}
+	rateLimitErr, ok := err.(*RateLimitError)
+	if !ok {
+		t.Fatalf("Expected a *RateLimitError error; got %#v.", err)
+	}
+	if got, want := rateLimitErr.Rate.Limit, 60; got != want {
+		t.Errorf("rateLimitErr rate limit = %v, want %v", got, want)
+	}
+	if got, want := rateLimitErr.Rate.Remaining, 0; got != want {
+		t.Errorf("rateLimitErr rate remaining = %v, want %v", got, want)
+	}
+	if rateLimitErr.Rate.Reset.UTC() != reset {
+		t.Errorf("rateLimitErr rate reset = %v, want %v", rateLimitErr.Rate.Reset.UTC(), reset)
+	}
+}
+
 func TestDo_noContent(t *testing.T) {
 	setup()
 	defer teardown()
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/v1/", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	})
 
