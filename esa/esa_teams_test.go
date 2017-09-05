@@ -114,6 +114,24 @@ func TestTeamsService_Get(t *testing.T) {
 	}
 }
 
+func TestTeamsService_Get_ErrorStatus(t *testing.T) {
+	setup()
+	defer teardown()
+
+	mux.HandleFunc("/v1/teams/hoge", func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+	})
+
+	_, resp, err := client.Teams.Get(context.Background(), "hoge")
+	if err == nil {
+		t.Error("Expected error to be returned.")
+	}
+
+	if resp == nil {
+		t.Error("TeamsService.Get returned Reponse, too")
+	}
+}
+
 func TestTeamsService_GetStats(t *testing.T) {
 	setup()
 	defer teardown()
@@ -152,5 +170,23 @@ func TestTeamsService_GetStats(t *testing.T) {
 	}
 	if !reflect.DeepEqual(team, want) {
 		t.Errorf("TeamsService.GetStats returned %+v, want %+v", team, want)
+	}
+}
+
+func TestTeamsService_GetStats_ErrorStatus(t *testing.T) {
+	setup()
+	defer teardown()
+
+	mux.HandleFunc("/v1/teams/hoge/stats", func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+	})
+
+	_, resp, err := client.Teams.GetStats(context.Background(), "hoge")
+	if err == nil {
+		t.Error("Expected error to be returned.")
+	}
+
+	if resp == nil {
+		t.Error("TeamsService.GetStats returned Reponse, too")
 	}
 }
