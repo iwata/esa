@@ -74,7 +74,7 @@ func TestString(t *testing.T) {
 			PerPage:    20,
 			MaxPerPage: 100,
 		}, `esa.TeamList{Teams:[esa.Team{Name:"hoge", Privacy:"", Description:"", Icon:"", URL:""}], PrevPage:null.Int{NullInt64:sql.NullInt64{Int64:1, Valid:false}}, NextPage:null.Int{NullInt64:sql.NullInt64{Int64:3, Valid:false}}, TotalCount:10, Page:2, PerPage:20, MaxPerPage:100}`},
-		{Rate{Limit: 75, Remaining: 73, Reset: Timestamp{Time: time.Date(2017, 9, 5, 10, 0, 0, 0, time.Local)}}, `esa.Rate{Limit:75, Remaining:73, Reset:esa.Timestamp{2017-09-05 10:00:00 +0900 JST}, err:}`},
+		{Rate{Limit: 75, Remaining: 73, Reset: Timestamp{Time: time.Date(2017, 9, 5, 10, 0, 0, 0, time.UTC)}}, `esa.Rate{Limit:75, Remaining:73, Reset:esa.Timestamp{2017-09-05 10:00:00 +0000 UTC}, err:}`},
 	}
 
 	for i, tt := range tests {
