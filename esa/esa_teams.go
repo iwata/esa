@@ -1,6 +1,10 @@
 package esa
 
-import "context"
+import (
+	"context"
+
+	null "gopkg.in/guregu/null.v3"
+)
 
 // TeamsService provides access to the team related functions
 // in the esa API.
@@ -23,13 +27,13 @@ func (t Team) String() string {
 
 // TeamList represents a list of esa teams.
 type TeamList struct {
-	Teams      []*Team `json:"teams"`
-	PrevPage   int     `json:"prev_page"`
-	NextPage   int     `json:"next_page"`
-	TotalCount int     `json:"total_count"`
-	Page       int     `json:"page"`
-	PerPage    int     `json:"per_page"`
-	MaxPerPage int     `json:"max_per_page"`
+	Teams      []*Team  `json:"teams"`
+	PrevPage   null.Int `json:"prev_page"`
+	NextPage   null.Int `json:"next_page"`
+	TotalCount int      `json:"total_count"`
+	Page       int      `json:"page"`
+	PerPage    int      `json:"per_page"`
+	MaxPerPage int      `json:"max_per_page"`
 }
 
 func (l TeamList) String() string {
