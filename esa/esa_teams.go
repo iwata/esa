@@ -78,8 +78,8 @@ func (s *TeamsService) List(ctx context.Context) (*TeamList, *Response, error) {
 // Get fetches a team by name.
 //
 // API docs: https://docs.esa.io/posts/102#4-2-0
-func (s *TeamsService) Get(ctx context.Context, name string) (*Team, *Response, error) {
-	u := fmt.Sprintf("teams/%s", name)
+func (s *TeamsService) Get(ctx context.Context, team string) (*Team, *Response, error) {
+	u := fmt.Sprintf("teams/%s", team)
 	req, err := s.client.NewRequest("GET", u, nil)
 	if err != nil {
 		return nil, nil, err
@@ -96,8 +96,8 @@ func (s *TeamsService) Get(ctx context.Context, name string) (*Team, *Response, 
 // GetStats fetches a statistics of team by name.
 //
 // API docs: https://docs.esa.io/posts/102#5-1-0
-func (s *TeamsService) GetStats(ctx context.Context, name string) (*TeamStats, *Response, error) {
-	u := fmt.Sprintf("teams/%s/stats", name)
+func (s *TeamsService) GetStats(ctx context.Context, team string) (*TeamStats, *Response, error) {
+	u := fmt.Sprintf("teams/%s/stats", team)
 	req, err := s.client.NewRequest("GET", u, nil)
 	if err != nil {
 		return nil, nil, err

@@ -39,7 +39,8 @@ type Client struct {
 	common service // Reuse a single struct instead of allocating one for each service on the heap.
 	// Services used for talking to different parts of the esa API.
 
-	Teams *TeamsService
+	Teams       *TeamsService
+	Invitations *InvitationsService
 
 	err error
 }
@@ -122,6 +123,7 @@ func NewClient(httpClient *http.Client) *Client {
 	c := &Client{client: httpClient, BaseURL: baseURL, err: err}
 	c.common.client = c
 	c.Teams = (*TeamsService)(&c.common)
+	c.Invitations = (*InvitationsService)(&c.common)
 	return c
 }
 
