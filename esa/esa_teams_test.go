@@ -80,3 +80,36 @@ func TestTeamsService_ListAll_ErrorStatus(t *testing.T) {
 		t.Error("TeamsService.List returned Reponse, too")
 	}
 }
+
+func TestTeamsService_Get(t *testing.T) {
+	setup()
+	defer teardown()
+
+	mux.HandleFunc("/v1/teams/hoge", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		testFormValues(t, r, values{})
+		fmt.Fprint(w, `{
+      "name": "docs",
+      "privacy": "open",
+      "description": "esa.io official documents",
+      "icon": "https://img.esa.io/uploads/production/teams/105/icon/thumb_m_0537ab827c4b0c18b60af6cdd94f239c.png",
+      "url": "https://docs.esa.io/"
+    }`)
+	})
+
+	team, _, err := client.Teams.Get(context.Background(), "hoge")
+	if err != nil {
+		t.Errorf("Teams.Get returned error: %v", err)
+	}
+
+	want := &Team{
+		Name:        "docs",
+		Privacy:     "open",
+		Description: "esa.io official documents",
+		Icon:        "https://img.esa.io/uploads/production/teams/105/icon/thumb_m_0537ab827c4b0c18b60af6cdd94f239c.png",
+		URL:         "https://docs.esa.io/",
+	}
+	if !reflect.DeepEqual(team, want) {
+		t.Errorf("TeamsService.Get returned %+v, want %+v", team, want)
+	}
+}

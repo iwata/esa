@@ -2,6 +2,7 @@ package esa
 
 import (
 	"context"
+	"fmt"
 
 	null "gopkg.in/guregu/null.v3"
 )
@@ -55,4 +56,22 @@ func (s *TeamsService) List(ctx context.Context) (*TeamList, *Response, error) {
 		return nil, resp, err
 	}
 	return list, resp, nil
+}
+
+// Get fetches a team by name.
+//
+// API docs: https://docs.esa.io/posts/102#4-2-0
+func (s *TeamsService) Get(ctx context.Context, name string) (*Team, *Response, error) {
+	u := fmt.Sprintf("teams/%s", name)
+	req, err := s.client.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	t := &Team{}
+	resp, err := s.client.Do(ctx, req, t)
+	if err != nil {
+		return nil, resp, err
+	}
+	return t, resp, nil
 }
