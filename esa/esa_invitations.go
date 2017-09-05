@@ -24,10 +24,28 @@ func (u InvitationURL) String() string {
 
 // GetURL fetches a team by name.
 //
-// API docs: https://docs.esa.io/posts/102#4-2-0
+// API docs: https://docs.esa.io/posts/102#12-1-0
 func (s *InvitationsService) GetURL(ctx context.Context, team string) (*InvitationURL, *Response, error) {
 	u := fmt.Sprintf("teams/%s/invitation", team)
 	req, err := s.client.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	url := &InvitationURL{}
+	resp, err := s.client.Do(ctx, req, url)
+	if err != nil {
+		return nil, resp, err
+	}
+	return url, resp, nil
+}
+
+// RegenerateURL regenerates an invitation URL
+//
+// API docs: https://docs.esa.io/posts/102#12-2-0
+func (s *InvitationsService) RegenerateURL(ctx context.Context, team string) (*InvitationURL, *Response, error) {
+	u := fmt.Sprintf("teams/%s/invitation_regenerator", team)
+	req, err := s.client.NewRequest("POST", u, nil)
 	if err != nil {
 		return nil, nil, err
 	}
