@@ -113,3 +113,44 @@ func TestTeamsService_Get(t *testing.T) {
 		t.Errorf("TeamsService.Get returned %+v, want %+v", team, want)
 	}
 }
+
+func TestTeamsService_GetStats(t *testing.T) {
+	setup()
+	defer teardown()
+
+	mux.HandleFunc("/v1/teams/hoge/stats", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		testFormValues(t, r, values{})
+		fmt.Fprint(w, `{
+      "members": 20,
+      "posts": 1959,
+      "posts_wip": 59,
+      "posts_shipped": 1900,
+      "comments": 2695,
+			"stars": 3115,
+			"daily_active_users": 8,
+			"weekly_active_users": 14,
+			"monthly_active_users": 15
+    }`)
+	})
+
+	team, _, err := client.Teams.GetStats(context.Background(), "hoge")
+	if err != nil {
+		t.Errorf("Teams.GetStats returned error: %v", err)
+	}
+
+	want := &TeamStats{
+		Members:            20,
+		Posts:              1959,
+		PostsWIP:           59,
+		PostsShipped:       1900,
+		Comments:           2695,
+		Stars:              3115,
+		DailyActiveUsers:   8,
+		WeeklyActiveUsers:  14,
+		MonthlyActiveUsers: 15,
+	}
+	if !reflect.DeepEqual(team, want) {
+		t.Errorf("TeamsService.GetStats returned %+v, want %+v", team, want)
+	}
+}

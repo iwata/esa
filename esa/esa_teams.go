@@ -41,6 +41,23 @@ func (l TeamList) String() string {
 	return Stringify(l)
 }
 
+// TeamStats represents a statistics of esa team.
+type TeamStats struct {
+	Members            int `json:"members"`
+	Posts              int `json:"posts"`
+	PostsWIP           int `json:"posts_wip"`
+	PostsShipped       int `json:"posts_shipped"`
+	Comments           int `json:"comments"`
+	Stars              int `json:"stars"`
+	DailyActiveUsers   int `json:"daily_active_users"`
+	WeeklyActiveUsers  int `json:"weekly_active_users"`
+	MonthlyActiveUsers int `json:"monthly_active_users"`
+}
+
+func (s TeamStats) String() string {
+	return Stringify(s)
+}
+
 // List lists all teams
 //
 // API docs: https://docs.esa.io/posts/102#4-1-0
@@ -74,4 +91,22 @@ func (s *TeamsService) Get(ctx context.Context, name string) (*Team, *Response, 
 		return nil, resp, err
 	}
 	return t, resp, nil
+}
+
+// GetStats fetches a statistics of team by name.
+//
+// API docs: https://docs.esa.io/posts/102#5-1-0
+func (s *TeamsService) GetStats(ctx context.Context, name string) (*TeamStats, *Response, error) {
+	u := fmt.Sprintf("teams/%s/stats", name)
+	req, err := s.client.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	st := &TeamStats{}
+	resp, err := s.client.Do(ctx, req, st)
+	if err != nil {
+		return nil, resp, err
+	}
+	return st, resp, nil
 }
