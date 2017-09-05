@@ -22,6 +22,29 @@ func (u InvitationURL) String() string {
 	return Stringify(u)
 }
 
+// Invitation represents an invitation to esa team.
+type Invitation struct {
+	Email     string    `json:"email"`
+	Code      string    `json:"code"`
+	ExpiresAt Timestamp `json:"expires_at"`
+	URL       string    `json:"url"`
+}
+
+func (i Invitation) String() string {
+	return Stringify(i)
+}
+
+// InvitationList represents a list of invitations.
+type InvitationList struct {
+	Invitations []*Invitation `json:"invitations"`
+	PrevPage    int           `json:"prev_page,omitempty"`
+	NextPage    int           `json:"next_page,omitempty"`
+	TotalCount  int           `json:"total_count,omitempty"`
+	Page        int           `json:"page,omitempty"`
+	PerPage     int           `json:"per_page,omitempty"`
+	MaxPerPage  int           `json:"max_per_page,omitempty"`
+}
+
 // GetURL fetches a team by name.
 //
 // API docs: https://docs.esa.io/posts/102#12-1-0

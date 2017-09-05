@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"reflect"
 	"testing"
-
-	null "gopkg.in/guregu/null.v3"
 )
 
 func TestTeamsService_ListAll(t *testing.T) {
@@ -51,8 +49,8 @@ func TestTeamsService_ListAll(t *testing.T) {
 				URL:         "https://docs.esa.io/",
 			},
 		},
-		PrevPage:   null.NewInt(0, false),
-		NextPage:   null.NewInt(0, false),
+		PrevPage:   0,
+		NextPage:   0,
 		TotalCount: 1,
 		Page:       1,
 		PerPage:    20,

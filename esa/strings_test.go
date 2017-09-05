@@ -11,8 +11,6 @@ import (
 	"fmt"
 	"testing"
 	"time"
-
-	null "gopkg.in/guregu/null.v3"
 )
 
 func TestStringify(t *testing.T) {
@@ -67,13 +65,13 @@ func TestString(t *testing.T) {
 		{Team{Name: "hoge"}, `esa.Team{Name:"hoge", Privacy:"", Description:"", Icon:"", URL:""}`},
 		{TeamList{
 			Teams:      []*Team{{Name: "hoge"}},
-			PrevPage:   null.NewInt(1, false),
-			NextPage:   null.NewInt(3, false),
+			PrevPage:   1,
+			NextPage:   3,
 			TotalCount: 10,
 			Page:       2,
 			PerPage:    20,
 			MaxPerPage: 100,
-		}, `esa.TeamList{Teams:[esa.Team{Name:"hoge", Privacy:"", Description:"", Icon:"", URL:""}], PrevPage:null.Int{NullInt64:sql.NullInt64{Int64:1, Valid:false}}, NextPage:null.Int{NullInt64:sql.NullInt64{Int64:3, Valid:false}}, TotalCount:10, Page:2, PerPage:20, MaxPerPage:100}`},
+		}, `esa.TeamList{Teams:[esa.Team{Name:"hoge", Privacy:"", Description:"", Icon:"", URL:""}], PrevPage:1, NextPage:3, TotalCount:10, Page:2, PerPage:20, MaxPerPage:100}`},
 		{Rate{Limit: 75, Remaining: 73, Reset: Timestamp{Time: time.Date(2017, 9, 5, 10, 0, 0, 0, time.UTC)}}, `esa.Rate{Limit:75, Remaining:73, Reset:esa.Timestamp{2017-09-05 10:00:00 +0000 UTC}, err:}`},
 		{TeamStats{Members: 100}, `esa.TeamStats{Members:100, Posts:0, PostsWIP:0, PostsShipped:0, Comments:0, Stars:0, DailyActiveUsers:0, WeeklyActiveUsers:0, MonthlyActiveUsers:0}`},
 		{InvitationURL{URL: "https://docs.esa.io/team/invitations/member-c05d112fa34870998ab4da1e98846ae3"}, `esa.InvitationURL{URL:"https://docs.esa.io/team/invitations/member-c05d112fa34870998ab4da1e98846ae3"}`},
