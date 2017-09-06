@@ -1,0 +1,37 @@
+---
+sudo: false
+language: go
+go:
+  - 1.9
+  - 1.8.x
+  - 1.7.x
+  - tip
+cache:
+  directories:
+    - vendor
+matrix:
+  allow_failures:
+    - go: tip
+  fast_finish: true
+env:
+  global:
+    - TZ=Asia/Tokyo
+    - REVIEWDOG_VERSION=0.9.8
+before_install:
+  # - go get github.com/golang/dep/cmd/dep
+  - go get github.com/mattn/goveralls
+  - go get github.com/golang/lint/golint
+  - go get github.com/kisielk/errcheck
+  - go get honnef.co/go/tools/cmd/unused
+  - go get honnef.co/go/tools/cmd/gosimple
+  - go get honnef.co/go/tools/cmd/staticcheck
+  - mkdir -p $HOME/bin/ && export PATH="$HOME/bin:$GOPATH/bin:$PATH"
+install:
+  - |
+    curl -fSL https://github.com/haya14busa/reviewdog/releases/download/$REVIEWDOG_VERSION/reviewdog_linux_amd64 \
+      -o ~/bin/reviewdog && \
+      chmod +x ~/bin/reviewdog
+  # - dep ensure -vendor-only -v
+script:
+  - goveralls -race -service=travis-ci
+  - reviewdog -ci=travis -conf=./reviewdog.yml
