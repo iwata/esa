@@ -256,3 +256,44 @@ func TestInvitationsService_GetList_ErrorStatus(t *testing.T) {
 		t.Error("InvitationsService.GetList returned Reponse, too")
 	}
 }
+
+func TestInvitationsService_Cancel(t *testing.T) {
+	setup()
+	defer teardown()
+
+	input := "mee93383edf699b525e01842d34078e28"
+
+	mux.HandleFunc("/v1/teams/hoge/invitations/"+input, func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "DELETE")
+		testFormValues(t, r, values{})
+		w.WriteHeader(http.StatusNoContent)
+	})
+
+	resp, err := client.Invitations.Cancel(context.Background(), "hoge", input)
+	if err != nil {
+		t.Errorf("Invitations.Cancel returned error: %v", err)
+	}
+
+	if resp == nil {
+		t.Error("Invitations.Cancel returned Response.")
+	}
+}
+
+func TestInvitationsService_Cancel_ErrorStatus(t *testing.T) {
+	setup()
+	defer teardown()
+
+	input := "mee93383edf699b525e01842d34078e28"
+	mux.HandleFunc("/v1/teams/hoge/invitations"+input, func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+	})
+
+	resp, err := client.Invitations.Cancel(context.Background(), "hoge", input)
+	if err == nil {
+		t.Error("Expected error to be returned.")
+	}
+
+	if resp == nil {
+		t.Error("InvitationsService.Cancel returned Reponse.")
+	}
+}

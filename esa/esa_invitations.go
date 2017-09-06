@@ -134,3 +134,20 @@ func (s *InvitationsService) GetList(ctx context.Context, team string) (*Invitat
 	}
 	return l, resp, nil
 }
+
+// Cancel deletes an invitation by an invitation code.
+//
+// API docs: https://docs.esa.io/posts/102#13-3-0
+func (s *InvitationsService) Cancel(ctx context.Context, team string, code string) (*Response, error) {
+	u := fmt.Sprintf("teams/%s/invitations/%s", team, code)
+	req, err := s.client.NewRequest("DELETE", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := s.client.Do(ctx, req, nil)
+	if err != nil {
+		return resp, err
+	}
+	return resp, nil
+}
