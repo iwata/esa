@@ -37,12 +37,16 @@ func (i Invitation) String() string {
 // InvitationList represents a list of invitations.
 type InvitationList struct {
 	Invitations []*Invitation `json:"invitations"`
-	PrevPage    int           `json:"prev_page,omitempty"`
-	NextPage    int           `json:"next_page,omitempty"`
-	TotalCount  int           `json:"total_count,omitempty"`
-	Page        int           `json:"page,omitempty"`
-	PerPage     int           `json:"per_page,omitempty"`
-	MaxPerPage  int           `json:"max_per_page,omitempty"`
+	PrevPage    int           `json:"prev_page"`
+	NextPage    int           `json:"next_page"`
+	TotalCount  int           `json:"total_count"`
+	Page        int           `json:"page"`
+	PerPage     int           `json:"per_page"`
+	MaxPerPage  int           `json:"max_per_page"`
+}
+
+func (l InvitationList) String() string {
+	return Stringify(l)
 }
 
 // GetURL fetches a team by name.
@@ -79,4 +83,22 @@ func (s *InvitationsService) RegenerateURL(ctx context.Context, team string) (*I
 		return nil, resp, err
 	}
 	return url, resp, nil
+}
+
+// GetList fetches a list of invitations.
+//
+// API docs: https://docs.esa.io/posts/102#13-2-0
+func (s *InvitationsService) GetList(ctx context.Context, team string) (*InvitationList, *Response, error) {
+	u := fmt.Sprintf("teams/%s/invitations", team)
+	req, err := s.client.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	l := &InvitationList{}
+	resp, err := s.client.Do(ctx, req, l)
+	if err != nil {
+		return nil, resp, err
+	}
+	return l, resp, nil
 }

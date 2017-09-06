@@ -26,6 +26,9 @@ var (
 	server *httptest.Server
 )
 
+// jst is a T/Z about JST
+var jst, _ = time.LoadLocation("Asia/Tokyo")
+
 // setup sets up a test HTTP server along with a esa.Client that is
 // configured to talk to that test server. Tests should register handlers on
 // mux which provide mock responses for the API method being tested.

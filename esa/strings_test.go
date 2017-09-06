@@ -72,9 +72,29 @@ func TestString(t *testing.T) {
 			PerPage:    20,
 			MaxPerPage: 100,
 		}, `esa.TeamList{Teams:[esa.Team{Name:"hoge", Privacy:"", Description:"", Icon:"", URL:""}], PrevPage:1, NextPage:3, TotalCount:10, Page:2, PerPage:20, MaxPerPage:100}`},
-		{Rate{Limit: 75, Remaining: 73, Reset: Timestamp{Time: time.Date(2017, 9, 5, 10, 0, 0, 0, time.UTC)}}, `esa.Rate{Limit:75, Remaining:73, Reset:esa.Timestamp{2017-09-05 10:00:00 +0000 UTC}, err:}`},
+		{Rate{Limit: 75, Remaining: 73, Reset: Timestamp{time.Date(2017, 9, 5, 10, 0, 0, 0, time.UTC)}}, `esa.Rate{Limit:75, Remaining:73, Reset:esa.Timestamp{2017-09-05 10:00:00 +0000 UTC}, err:}`},
 		{TeamStats{Members: 100}, `esa.TeamStats{Members:100, Posts:0, PostsWIP:0, PostsShipped:0, Comments:0, Stars:0, DailyActiveUsers:0, WeeklyActiveUsers:0, MonthlyActiveUsers:0}`},
 		{InvitationURL{URL: "https://docs.esa.io/team/invitations/member-c05d112fa34870998ab4da1e98846ae3"}, `esa.InvitationURL{URL:"https://docs.esa.io/team/invitations/member-c05d112fa34870998ab4da1e98846ae3"}`},
+		{Invitation{
+			Email:     "foo@example.com",
+			Code:      "mee93383edf699b525e01842d34078e28",
+			ExpiresAt: Timestamp{time.Date(2017, 9, 6, 10, 0, 0, 0, time.UTC)},
+			URL:       "https://docs.esa.io/team/invitations/mee93383edf699b525e01842d34078e28/join",
+		}, `esa.Invitation{Email:"foo@example.com", Code:"mee93383edf699b525e01842d34078e28", ExpiresAt:esa.Timestamp{2017-09-06 10:00:00 +0000 UTC}, URL:"https://docs.esa.io/team/invitations/mee93383edf699b525e01842d34078e28/join"}`},
+		{InvitationList{
+			Invitations: []*Invitation{{
+				Email:     "foo@example.com",
+				Code:      "mee93383edf699b525e01842d34078e28",
+				ExpiresAt: Timestamp{time.Date(2017, 9, 6, 10, 0, 0, 0, time.UTC)},
+				URL:       "https://docs.esa.io/team/invitations/mee93383edf699b525e01842d34078e28/join",
+			}},
+			PrevPage:   0,
+			NextPage:   0,
+			TotalCount: 2,
+			Page:       1,
+			PerPage:    20,
+			MaxPerPage: 100,
+		}, `esa.InvitationList{Invitations:[esa.Invitation{Email:"foo@example.com", Code:"mee93383edf699b525e01842d34078e28", ExpiresAt:esa.Timestamp{2017-09-06 10:00:00 +0000 UTC}, URL:"https://docs.esa.io/team/invitations/mee93383edf699b525e01842d34078e28/join"}], PrevPage:0, NextPage:0, TotalCount:2, Page:1, PerPage:20, MaxPerPage:100}`},
 	}
 
 	for i, tt := range tests {

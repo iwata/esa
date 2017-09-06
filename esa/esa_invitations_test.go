@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestInvitationsService_GetURL(t *testing.T) {
@@ -91,5 +92,68 @@ func TestInvitationsService_RegenerateURL_ErrorStatus(t *testing.T) {
 
 	if resp == nil {
 		t.Error("InvitationsService.RegenerateURL returned Reponse, too")
+	}
+}
+
+func TestInvitationsService_GetList(t *testing.T) {
+	setup()
+	defer teardown()
+
+	mux.HandleFunc("/v1/teams/hoge/invitations", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		testFormValues(t, r, values{})
+		fmt.Fprint(w, `{
+    "invitations": [
+        {
+            "email": "foo@example.com",
+            "code": "mee93383edf699b525e01842d34078e28",
+            "expires_at": "2017-08-17T12:00:41+09:00",
+            "url": "https://docs.esa.io/team/invitations/mee93383edf699b525e01842d34078e28/join"
+        },
+        {
+            "email": "bar@example.com",
+            "code": "mc542eed211a8e4f1db6ccccb14fcda9d",
+            "expires_at": "2017-08-17T12:00:44+09:00",
+            "url": "https://docs.esa.io/team/invitations/mc542eed211a8e4f1db6ccccb14fcda9d/join"
+        }
+    ],
+    "prev_page": null,
+    "next_page": null,
+    "total_count": 2,
+    "page": 1,
+    "per_page": 20,
+    "max_per_page": 100
+	}`)
+	})
+
+	l, _, err := client.Invitations.GetList(context.Background(), "hoge")
+	if err != nil {
+		t.Errorf("Invitations.GetList returned error: %v", err)
+	}
+
+	want := &InvitationList{
+		Invitations: []*Invitation{
+			{
+				Email:     "foo@example.com",
+				Code:      "mee93383edf699b525e01842d34078e28",
+				ExpiresAt: Timestamp{time.Date(2017, 8, 17, 12, 0, 41, 0, jst).Local()},
+				URL:       "https://docs.esa.io/team/invitations/mee93383edf699b525e01842d34078e28/join",
+			},
+			{
+				Email:     "bar@example.com",
+				Code:      "mc542eed211a8e4f1db6ccccb14fcda9d",
+				ExpiresAt: Timestamp{time.Date(2017, 8, 17, 12, 0, 44, 0, jst).Local()},
+				URL:       "https://docs.esa.io/team/invitations/mc542eed211a8e4f1db6ccccb14fcda9d/join",
+			},
+		},
+		PrevPage:   0,
+		NextPage:   0,
+		TotalCount: 2,
+		Page:       1,
+		PerPage:    20,
+		MaxPerPage: 100,
+	}
+	if !reflect.DeepEqual(l, want) {
+		t.Errorf("InvitationsService.GetList returned %+v, want %+v", l, want)
 	}
 }
