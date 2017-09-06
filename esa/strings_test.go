@@ -95,6 +95,7 @@ func TestString(t *testing.T) {
 			PerPage:    20,
 			MaxPerPage: 100,
 		}, `esa.InvitationList{Invitations:[esa.Invitation{Email:"foo@example.com", Code:"mee93383edf699b525e01842d34078e28", ExpiresAt:esa.Timestamp{2017-09-06 10:00:00 +0000 UTC}, URL:"https://docs.esa.io/team/invitations/mee93383edf699b525e01842d34078e28/join"}], PrevPage:0, NextPage:0, TotalCount:2, Page:1, PerPage:20, MaxPerPage:100}`},
+		{InvitationMember{Member: &InvitationEmails{[]string{"foo@example.com"}}}, `esa.InvitationMember{Member:esa.InvitationEmails{Emails:["foo@example.com"]}}`},
 	}
 
 	for i, tt := range tests {
