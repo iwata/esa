@@ -4,6 +4,7 @@ language: go
 go:
   - 1.9
   - 1.8.x
+  - 1.7.x
   - tip
 cache:
   directories:
@@ -17,7 +18,7 @@ env:
     - TZ=Asia/Tokyo
     - REVIEWDOG_VERSION=0.9.8
 before_install:
-  - go get github.com/golang/dep/cmd/dep
+  # - go get github.com/golang/dep/cmd/dep
   - go get github.com/mattn/goveralls
   - go get github.com/golang/lint/golint
   - go get github.com/kisielk/errcheck
@@ -30,7 +31,7 @@ install:
     curl -fSL https://github.com/haya14busa/reviewdog/releases/download/$REVIEWDOG_VERSION/reviewdog_linux_amd64 \
       -o ~/bin/reviewdog && \
       chmod +x ~/bin/reviewdog
-  - dep ensure -vendor-only -v
+  # - dep ensure -vendor-only -v
 script:
   - goveralls -race -service=travis-ci
   - reviewdog -ci=travis -conf=./reviewdog.yml
