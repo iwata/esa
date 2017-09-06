@@ -13,6 +13,7 @@ matrix:
   fast_finish: true
 env:
   global:
+    - TZ=Asia/Tokyo
     - REVIEWDOG_VERSION=0.9.8
 before_install:
   - go get github.com/golang/dep/cmd/dep
