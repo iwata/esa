@@ -176,7 +176,7 @@ func TestInvitationsService_SendToMember_ErrorStatus(t *testing.T) {
 	}
 }
 
-func TestInvitationsService_GetList(t *testing.T) {
+func TestInvitationsService_PendingInvitations(t *testing.T) {
 	setup()
 	defer teardown()
 
@@ -207,9 +207,9 @@ func TestInvitationsService_GetList(t *testing.T) {
 	}`)
 	})
 
-	l, _, err := client.Invitations.GetList(context.Background(), "hoge")
+	l, _, err := client.Invitations.PendingInvitations(context.Background(), "hoge")
 	if err != nil {
-		t.Errorf("Invitations.GetList returned error: %v", err)
+		t.Errorf("Invitations.PendingInvitations returned error: %v", err)
 	}
 
 	want := &InvitationList{
@@ -235,11 +235,11 @@ func TestInvitationsService_GetList(t *testing.T) {
 		MaxPerPage: 100,
 	}
 	if !reflect.DeepEqual(l, want) {
-		t.Errorf("InvitationsService.GetList returned %+v, want %+v", l, want)
+		t.Errorf("InvitationsService.PendingInvitations returned %+v, want %+v", l, want)
 	}
 }
 
-func TestInvitationsService_GetList_ErrorStatus(t *testing.T) {
+func TestInvitationsService_PendingInvitations_ErrorStatus(t *testing.T) {
 	setup()
 	defer teardown()
 
@@ -247,13 +247,13 @@ func TestInvitationsService_GetList_ErrorStatus(t *testing.T) {
 		http.Error(w, "Forbidden", http.StatusForbidden)
 	})
 
-	_, resp, err := client.Invitations.GetList(context.Background(), "hoge")
+	_, resp, err := client.Invitations.PendingInvitations(context.Background(), "hoge")
 	if err == nil {
 		t.Error("Expected error to be returned.")
 	}
 
 	if resp == nil {
-		t.Error("InvitationsService.GetList returned Reponse, too")
+		t.Error("InvitationsService.PendingInvitations returned Reponse, too")
 	}
 }
 

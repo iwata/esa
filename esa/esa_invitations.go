@@ -117,10 +117,10 @@ func (s *InvitationsService) SendToMember(ctx context.Context, team string, memb
 	return l, resp, nil
 }
 
-// GetList fetches a list of invitations.
+// PendingInvitations fetches a list of pending invitations.
 //
 // API docs: https://docs.esa.io/posts/102#13-2-0
-func (s *InvitationsService) GetList(ctx context.Context, team string) (*InvitationList, *Response, error) {
+func (s *InvitationsService) PendingInvitations(ctx context.Context, team string) (*InvitationList, *Response, error) {
 	u := fmt.Sprintf("teams/%s/invitations", team)
 	req, err := s.client.NewRequest("GET", u, nil)
 	if err != nil {
