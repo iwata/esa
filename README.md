@@ -93,3 +93,10 @@ func main() {
 	fmt.Printf("%v\n", list)
 }
 ```
+
+## Supported API
+
+- [Teams](https://docs.esa.io/posts/102#4-0-0)
+- [Stats](https://docs.esa.io/posts/102#5-0-0)
+- [Invitation URL](https://docs.esa.io/posts/102#12-0-0)
+- [Invitation Email](https://docs.esa.io/posts/102#13-0-0)
