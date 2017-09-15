@@ -5,6 +5,10 @@
 
 `go-esa` is a client library for esa.io API v1.
 
+## Requirements
+
+- Go 1.7+
+
 ## Installation
 
 ```sh
@@ -14,6 +18,8 @@ go get github.com/iwata/go-esa
 ## Sample code
 
 ```go
+package main
+
 import (
 	"context"
 	"fmt"
@@ -33,25 +39,57 @@ func main() {
 	tc := oauth2.NewClient(ctx, ts)
 	client := esa.NewClient(tc)
 
-	team := "esa-team"
-	emails := []string{"hoge@example.com", "fuga@example.com"}
+	// Fetch joining teams
+	// ref. https://docs.esa.io/posts/102#4-1-0
+	teamList, _, err := client.Teams.List(ctx)
+	if err != nil {
+		log.Panic(err)
+	}
+	fmt.Println("--- Team List ---")
+	fmt.Printf("%v\n", teamList)
 
+	team := os.Getenv("ESA_TEAM")
+
+	// Get URL for invitation
+	// ref. https://docs.esa.io/posts/102#12-1-0
+	url, _, err := client.Invitations.GetURL(ctx, team)
+	if err != nil {
+		log.Panic(err)
+	}
+	fmt.Println("--- Invitation URL ---")
+	fmt.Printf("%v\n", url)
+	
 	// Send invitations
 	// ref. https://docs.esa.io/posts/102#13-1-0
+	emails := []string{"hoge@example.com", "fuga@example.com"}
 	resList, _, err := client.Invitations.SendToMember(ctx, team, &esa.InvitationMember{
 		Member: &esa.InvitationEmails{Emails: emails},
 	})
 	if err != nil {
 		log.Panic(err)
 	}
-	fmt.Sprintf("%v", reslist)
+	fmt.Println("--- Invited List ---")
+	fmt.Printf("%v\n", resList)
 
-	// Fetch pending invitations
-	// ref. https://docs.esa.io/posts/102#13-2-0
-	list, _, err := esaClient.Invitations.GetList(ctx, team)
+	// Send invitations
+	// ref. https://docs.esa.io/posts/102#13-1-0
+	emails := []string{"hoge@example.com", "fuga@example.com"}
+	resList, _, err := client.Invitations.SendToMember(ctx, team, &esa.InvitationMember{
+		Member: &esa.InvitationEmails{Emails: emails},
+	})
 	if err != nil {
 		log.Panic(err)
 	}
-	fmt.Sprintf("%v", list)
+	fmt.Println("--- Invited List ---")
+	fmt.Printf("%v\n", resList)
+
+	// Fetch pending invitations
+	// ref. https://docs.esa.io/posts/102#13-2-0
+	list, _, err := client.Invitations.PendingInvitations(ctx, team)
+	if err != nil {
+		log.Panic(err)
+	}
+	fmt.Println("--- Pending Invitations ---")
+	fmt.Printf("%v\n", list)
 }
 ```
