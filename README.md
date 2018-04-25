@@ -13,7 +13,7 @@
 ## Installation
 
 ```sh
-go get github.com/iwata/go-esa
+go get github.com/iwata/go-esa/esa
 ```
 
 ## Sample code
